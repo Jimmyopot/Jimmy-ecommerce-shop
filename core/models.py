@@ -26,6 +26,7 @@ class Item(models.Model):
     label = models.CharField(choices=LABEL_CHOICES, max_length=1)
     slug = models.SlugField()
     description = models.TextField(default="This is a product description")
+    image = models.ImageField(blank=True, null=True, default = "")
     
     def __str__(self):
         return self.title
@@ -38,6 +39,14 @@ class Item(models.Model):
     
     def get_remove_from_cart_url(self):
         return reverse("core:remove-from-cart", kwargs={'slug': self.slug})
+    
+    @property
+    def imageUrl(self):
+        try:
+            url = self.image.url 
+        except:
+            url = ''
+        return url
     
 
 class OrderItem(models.Model):
@@ -72,6 +81,7 @@ class Order(models.Model):
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
     payment_address = models.ForeignKey('PaymentAddress', on_delete=models.SET_NULL, blank=True, null=True)
+    payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
     
     def __str__(self):
         return self.user.username
@@ -89,9 +99,16 @@ class PaymentAddress(models.Model):
     street_address = models.CharField(max_length=100)
     country = CountryField(multiple=True)
     zip = models.CharField(max_length=100)
-    # same_billing_address = 
-    # save_info = 
-    # payment_option =
+    
+    def __str__(self):
+        return self.user.username
+    
+    
+class Payment(models.Model):
+    stripe_charge_id = models.CharField(max_length=40)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    amount = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.user.username
