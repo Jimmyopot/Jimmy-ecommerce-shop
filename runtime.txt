@@ -1,1 +1,1 @@
-Python - 3.8.6
+python3-openid==3.2.0
